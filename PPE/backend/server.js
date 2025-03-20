@@ -9,47 +9,57 @@ app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
+// Function to get the local IP address
+function getLocalIP() {
+  const os = require("os");
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === "IPv4" && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return "localhost";
+}
+
+// Create HTTP Server (Fixes the issue)
 const server = http.createServer(app);
+
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "*", // Change this to LAN IP when needed
     methods: ["GET", "POST"],
   },
 });
 
-let dataInterval = null; // Store interval globally
-let connectedUsers = 0; // Track active users
+let dataInterval = null;
+let connectedUsers = 0;
 
 io.on("connection", (socket) => {
   connectedUsers++;
   console.log(`✅ User connected: ${socket.id} | Active users: ${connectedUsers}`);
 
-  // Emit a welcome event to confirm connection
   socket.emit("welcome", { message: "Connected to WebSocket server" });
 
-  // Start sending data only if it's the first connection
   if (connectedUsers === 1) {
     startDataEmission();
   }
 
-  // Handle disconnection
   socket.on("disconnect", () => {
     connectedUsers--;
     console.log(`❌ User disconnected: ${socket.id} | Active users: ${connectedUsers}`);
 
-    // Stop data emission if no users are connected
     if (connectedUsers === 0) {
       stopDataEmission();
     }
   });
 
-  // Listen for WebSocket errors
   socket.on("connect_error", (err) => {
     console.error("⚠️ WebSocket connection error:", err.message);
   });
 });
 
-// Start interval if not already running
 const startDataEmission = () => {
   if (!dataInterval) {
     console.log("📡 Starting data emission...");
@@ -64,7 +74,6 @@ const startDataEmission = () => {
   }
 };
 
-// Stop interval when no users are connected
 const stopDataEmission = () => {
   if (dataInterval) {
     clearInterval(dataInterval);
@@ -78,7 +87,7 @@ const shutdownServer = () => {
   console.log("\n🛑 Shutting down server...");
 
   io.close(() => console.log("✅ WebSocket server closed."));
-  stopDataEmission(); // Ensure interval stops
+  stopDataEmission();
   server.close(() => {
     console.log("✅ HTTP server closed.");
     process.exit(0);
@@ -88,9 +97,10 @@ const shutdownServer = () => {
 process.on("SIGINT", shutdownServer);
 process.on("SIGTERM", shutdownServer);
 
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+// ✅ Start server **AFTER** defining `server`
+const HOST = "0.0.0.0"; // Allows LAN access
+server.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running on http://${getLocalIP()}:${PORT}`);
 });
-
 
 // taskkill /IM node.exe /F (to kill the process in the server)
