@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { SOCKET } from "./config";
 import { io } from "socket.io-client";
 import {
   LineChart,
@@ -12,7 +13,7 @@ import {
 } from "recharts";
 
 // Create a single WebSocket instance
-const socket = io("http://192.168.10.153:3000", {
+const socket = io(SOCKET, {
   transports: ["websocket", "polling"], // Use WebSocket first
   reconnectionAttempts: 5, // Retry up to 5 times if disconnected
   reconnectionDelay: 2000, // Wait 2s before retrying
