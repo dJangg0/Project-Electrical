@@ -101,6 +101,7 @@ process.on("SIGTERM", shutdownServer);
 const HOST = "0.0.0.0"; // Allows LAN access
 server.listen(PORT, HOST, () => {
   console.log(`🚀 Server running on http://${getLocalIP()}:${PORT}`);
+
 });
 
 // taskkill /IM node.exe /F (to kill the process in the server)
