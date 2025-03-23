@@ -11,6 +11,7 @@ import {
     Legend,
     ResponsiveContainer,
 } from "recharts";
+import "../App.css";
 
 // Create a single WebSocket instance
 const socket = io(SOCKET, {
@@ -48,19 +49,67 @@ function MobileUI() {
         };
     }, []);
 
+    const getVoltageStatus = (voltage: number) => {
+        if (voltage > 200) {
+            return <span className="text-red-600 font-bold text-lg">OVER VOLTAGE!</span>;
+        } else if (voltage < 120) {
+            return <span className="text-yellow-600 font-bold text-lg">LOW VOLTAGE!</span>;
+        }
+        return <span className="text-green-600 font-bold text-lg">NORMAL</span>;
+    };
+
+    const getCurrentStatus = (current: number) => {
+        if (current > 40) {
+            return <span className="text-red-600 font-bold text-lg">OVER CURRENT!</span>;
+        } else if (current < 20) {
+            return <span className="text-yellow-600 font-bold text-lg">LOW CURRENT!</span>;
+        }
+        return <span className="text-green-600 font-bold text-lg">NORMAL</span>;
+    };
+
+    const getTemperatureStatus = (temperature : number) => {
+        if (temperature > 50) {
+            return <span className="text-red-600 font-bold text-lg">HOT!</span>;
+        } else if (temperature  < 20) {
+            return <span className="text-blue-600 font-bold text-lg">COLD!</span>;
+        }
+        return <span className="text-green-600 font-bold text-lg">NORMAL</span>;
+    };
+
+    // ...existing code...
+
     const renderChart = (dataKey: keyof GraphData, label: string, color: string) => (
         <div className="bg-white shadow-lg rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">{label}</h2>
-            <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                    <XAxis dataKey="name" stroke="#2c3e50" />
-                    <YAxis stroke="#2c3e50" />
-                    <Tooltip contentStyle={{ backgroundColor: "#fff", borderRadius: "4px" }} />
-                    <Legend />
-                    <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={3} dot={{ fill: color, strokeWidth: 2 }} />
-                </LineChart>
-            </ResponsiveContainer>
+            <div className="flex flex-col space-y-2">
+                <h2 className="text-xl font-semibold text-gray-800">{label}</h2>
+                <div className="flex justify-between items-center">
+                    {dataKey === "voltage" && data.length > 0 && (
+                        <div className="flex items-center">
+                            Status: {getVoltageStatus(data[data.length - 1].voltage)}
+                        </div>
+                    )}
+                    {dataKey === "current" && data.length > 0 && (
+                        <div className="flex items-center">
+                            Status: {getCurrentStatus(data[data.length - 1].current)}
+                        </div>
+                    )}
+                    {dataKey === "temperature" && data.length > 0 && (
+                        <div className="flex items-center">
+                            Status: {getTemperatureStatus(data[data.length - 1].current)}
+                        </div>
+                    )}
+                </div>
+                <ResponsiveContainer width="100%" height={200}>
+                    <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                        <XAxis dataKey="name" stroke="#2c3e50" />
+                        <YAxis stroke="#2c3e50" />
+                        <Tooltip contentStyle={{ backgroundColor: "#fff", borderRadius: "4px" }} />
+                        <Legend />
+                        <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={3} dot={{ fill: color, strokeWidth: 2 }} />
+                    </LineChart>
+                </ResponsiveContainer>
+            </div>
         </div>
     );
 

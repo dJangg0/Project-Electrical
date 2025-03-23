@@ -12,6 +12,8 @@ import {
     ResponsiveContainer,
 } from "recharts";
 
+import "../App.css";
+
 // Create a single WebSocket instance
 const socket = io(SOCKET, {
     transports: ["websocket", "polling"], // Use WebSocket first
@@ -50,7 +52,9 @@ function Dashboard() {
 
     const renderChart = (dataKey: keyof GraphData, label: string, color: string) => (
         <div className="bg-white shadow-lg rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">{label}</h2>
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">{label}</h2>
+            </div>
             <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
@@ -68,6 +72,13 @@ function Dashboard() {
         <div className="min-h-screen bg-gray-100 p-6">
             <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Real-Time Panel Board Monitor</h1>
 
+            <div className="flex justify-center items-center mb-4">
+                <div className={`px-4 py-2 rounded-full ${
+                    isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
+                    {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
+                </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                 {renderChart("voltage", "Voltage (V)", "#3498db")}
@@ -78,9 +89,11 @@ function Dashboard() {
             <div className="mt-6 p-4 bg-white shadow-md rounded-lg text-center">
                 <p className="text-gray-600">Latest Values:</p>
                 {data.length > 0 ? (
-                    <p className="text-lg font-bold text-gray-800">
-                        {data[data.length - 1].voltage.toFixed(2)} V, {data[data.length - 1].current.toFixed(2)} A, {data[data.length - 1].temperature.toFixed(2)}°C
-                    </p>
+                    <div>
+                        <p className="text-lg font-bold text-gray-800">
+                            {data[data.length - 1].voltage.toFixed(2)} V, {data[data.length - 1].current.toFixed(2)} A, {data[data.length - 1].temperature.toFixed(2)}°C
+                        </p>
+                    </div>
                 ) : (
                     <p className="text-lg font-bold text-gray-800">No data available</p>
                 )}
@@ -88,6 +101,5 @@ function Dashboard() {
         </div>
     );
 }
-
 
 export default Dashboard;
