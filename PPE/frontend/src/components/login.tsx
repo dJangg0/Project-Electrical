@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import "../App.css";
 type LoginProps = {
     onLogin: (userRole: "admin" | "user") => void;
 };
@@ -25,30 +25,45 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
-            <form onSubmit={handleSubmit} className="bg-white p-6 shadow-md rounded-lg w-80">
-                <h2 className="text-xl font-bold mb-4 text-center">Login</h2>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-gray-100">
+            <form onSubmit={handleSubmit} className="bg-white p-8 shadow-xl rounded-lg w-96 space-y-6">
+                <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Welcome Back</h2>
 
-                <input
-                    type="text"
-                    placeholder="Username"
-                    className="border p-2 w-full mb-3 rounded"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
+                <div className="space-y-2">
+                    <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                        Username
+                    </label>
+                    <input
+                        id="username"
+                        type="text"
+                        placeholder="Enter your username"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ease-in-out text-gray-700 outline-none"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                </div>
 
-                <input
-                    type="password"
-                    placeholder="Password"
-                    className="border p-2 w-full mb-3 rounded"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
+                <div className="space-y-2">
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                        Password
+                    </label>
+                    <input
+                        id="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ease-in-out text-gray-700 outline-none"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                    />
+                </div>
 
-                <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full hover:bg-blue-600">
-                    Login
+                <button 
+                    type="submit" 
+                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 ease-in-out"
+                >
+                    Sign In
                 </button>
             </form>
         </div>

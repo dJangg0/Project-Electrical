@@ -64,9 +64,9 @@ const startDataEmission = () => {
   if (!dataInterval) {
     console.log("📡 Starting data emission...");
     dataInterval = setInterval(() => {
-      const voltageData = Math.random() * (240 - 180) + 180;
-      const currentData = Math.random() * (20 - 5) + 5;
-      const temperatureData = Math.random() * (80 - 30) + 30;
+      const voltageData = Math.random() * (240 - 10) + 10;
+      const currentData = Math.random() * (60 - 10) + 10;
+      const temperatureData = Math.random() * (80 - 10) + 10;
 
       console.log("📊 Emitting data:", { voltage: voltageData, current: currentData, temperature: temperatureData });
       io.emit("graphData", { voltage: voltageData, current: currentData, temperature: temperatureData });
