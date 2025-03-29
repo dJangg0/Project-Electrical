@@ -11,6 +11,9 @@ import {
     Legend,
     ResponsiveContainer,
 } from "recharts";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import * as Tone from "tone"; // Import Tone.js
 
 import "../App.css";
 
@@ -32,23 +35,70 @@ function Dashboard() {
     const [data, setData] = useState<GraphData[]>([]);
     const [isConnected, setIsConnected] = useState(false);
 
-    useEffect(() => {
-        const handleConnect = () => setIsConnected(true);
-        const handleDisconnect = () => setIsConnected(false);
-        const handleGraphData = (newData: Omit<GraphData, "name">) => {
-            setData((prev) => [...prev.slice(-9), { name: `T${prev.length}`, ...newData }]);
-        };
+    const notify = (message: string, type: "success" | "error" | "warning") => {
+        if (type === "success") {
+            toast.success(message);
+        } else if (type === "error") {
+            toast.error(message);
+        } else if (type === "warning") {
+            toast.warning(message);
+        }
+    };
 
-        socket.on("connect", handleConnect);
-        socket.on("disconnect", handleDisconnect);
-        socket.on("graphData", handleGraphData);
-
-        return () => {
-            socket.off("connect", handleConnect);
-            socket.off("disconnect", handleDisconnect);
-            socket.off("graphData", handleGraphData);
+    const playTone = (frequency: number, duration: string | number = "4n") => {
+            const synth = new Tone.Synth().toDestination();
+            synth.triggerAttackRelease(frequency, duration); // Play a note for the specified duration
         };
-    }, []);
+    
+        useEffect(() => {
+            const handleConnect = () => {
+                console.log("✅ Connected to WebSocket server");
+                setIsConnected(true); // Update state to reflect connection
+            };
+        
+            const handleDisconnect = () => {
+                console.log("❌ Disconnected from WebSocket server");
+                setIsConnected(false); // Update state to reflect disconnection
+            };
+            const handleGraphData = (newData: Omit<GraphData, "name">) => {
+                setData((prev) => [...prev.slice(-9), { name: `T${prev.length}`, ...newData }]);
+        
+                // Check for abnormal conditions and show notifications
+                if (newData.voltage > 250) {
+                    notify("Over Voltage Detected!", "error");
+                    playTone(440, 3); // Play a tone at 440 Hz (A4) for 2 seconds
+                } else if (newData.voltage < 207) {
+                    notify("Low Voltage Detected!", "warning");
+                    playTone(220, 3); // Play a tone at 220 Hz (A3) for 2 seconds
+                }
+        
+                if (newData.current > 20) {
+                    notify("Over Current Detected!", "error");
+                    playTone(880, 3); // Play a tone at 880 Hz (A5) for 1.5 seconds
+                } else if (newData.current < 10) {
+                    notify("Low Current Detected!", "warning");
+                    playTone(330, 3); // Play a tone at 330 Hz (E4) for 1.5 seconds
+                }
+        
+                if (newData.temperature > 35) {
+                    notify("High Temperature Detected!", "error");
+                    playTone(660, 3); // Play a tone at 660 Hz (E5) for 2 seconds
+                } else if (newData.temperature < 20) {
+                    notify("Low Temperature Detected!", "warning");
+                    playTone(550, 3); // Play a tone at 550 Hz (C#5) for 2 seconds
+                }
+            };
+        
+            socket.on("connect", handleConnect);
+            socket.on("disconnect", handleDisconnect);
+            socket.on("graphData", handleGraphData);
+        
+            return () => {
+                socket.off("connect", handleConnect);
+                socket.off("disconnect", handleDisconnect);
+                socket.off("graphData", handleGraphData);
+            };
+        }, []);
 
     const renderChart = (dataKey: keyof GraphData, label: string, color: string) => (
         <div className="bg-white shadow-lg rounded-lg p-6">
@@ -98,6 +148,9 @@ function Dashboard() {
                     <p className="text-lg font-bold text-gray-800">No data available</p>
                 )}
             </div>
+
+            {/* Toast Container */}
+            <ToastContainer />
         </div>
     );
 }

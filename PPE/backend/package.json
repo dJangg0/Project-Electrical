@@ -12,10 +12,13 @@
   "description": "",
   "dependencies": {
     "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "nodemon": "^3.1.9",
-    "socket.io": "^4.8.1"
+    "react-toastify": "^11.0.5",
+    "socket.io": "^4.8.1",
+    "tone": "^15.0.4"
   },
   "devDependencies": {
     "vite": "^6.2.2"
