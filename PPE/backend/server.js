@@ -2,6 +2,8 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
+const fs = require("fs");
+const csv = require("csv-parser");
 require("dotenv").config();
 
 const app = express();
@@ -23,7 +25,7 @@ function getLocalIP() {
   return "localhost";
 }
 
-// Create HTTP Server (Fixes the issue)
+// Create HTTP Server
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -35,6 +37,31 @@ const io = new Server(server, {
 
 let dataInterval = null;
 let connectedUsers = 0;
+let csvData = [];
+let currentIndex = 0;
+
+// Load CSV data
+const loadCSVData = () => {
+  csvData = [];
+  fs.createReadStream("data.csv")
+    .pipe(csv())
+    .on("data", (row) => {
+      csvData.push({
+        timestamp: row.Timestamp,
+        voltage: parseFloat(row["Voltage (V)"]),
+        current: parseFloat(row["Current (A)"]),
+        temperature: parseFloat(row["Temperature (degree Celsius)"]),
+      });
+    })
+    .on("end", () => {
+      console.log("✅ CSV data loaded successfully.");
+    })
+    .on("error", (err) => {
+      console.error("❌ Error reading CSV file:", err.message);
+    });
+};
+
+loadCSVData();
 
 io.on("connection", (socket) => {
   connectedUsers++;
@@ -61,16 +88,20 @@ io.on("connection", (socket) => {
 });
 
 const startDataEmission = () => {
-  if (!dataInterval) {
+  if (!dataInterval && csvData.length > 0) {
     console.log("📡 Starting data emission...");
+    currentIndex = 0; // Reset index
     dataInterval = setInterval(() => {
-      const voltageData = Math.random() * (240 - 10) + 10;
-      const currentData = Math.random() * (60 - 10) + 10;
-      const temperatureData = Math.random() * (80 - 10) + 10;
-
-      console.log("📊 Emitting data:", { voltage: voltageData, current: currentData, temperature: temperatureData });
-      io.emit("graphData", { voltage: voltageData, current: currentData, temperature: temperatureData });
-    }, 1000);
+      if (currentIndex < csvData.length) {
+        const data = csvData[currentIndex];
+        console.log("📊 Emitting data:", data);
+        io.emit("graphData", data);
+        currentIndex++;
+      } else {
+        console.log("✅ All data emitted. Restarting from the beginning.");
+        currentIndex = 0; // Restart from the beginning
+      }
+    }, 5000); // 5-second interval
   }
 };
 
@@ -101,7 +132,4 @@ process.on("SIGTERM", shutdownServer);
 const HOST = "0.0.0.0"; // Allows LAN access
 server.listen(PORT, HOST, () => {
   console.log(`🚀 Server running on http://${getLocalIP()}:${PORT}`);
-
 });
-
-// taskkill /IM node.exe /F (to kill the process in the server)
