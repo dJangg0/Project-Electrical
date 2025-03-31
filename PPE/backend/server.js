@@ -101,7 +101,7 @@ const startDataEmission = () => {
         console.log("✅ All data emitted. Restarting from the beginning.");
         currentIndex = 0; // Restart from the beginning
       }
-    }, 5000); // 5-second interval
+    }, 3000); // 5-second interval
   }
 };
 

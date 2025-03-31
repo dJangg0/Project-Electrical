@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
 import { SOCKET } from "../config";
 import { io } from "socket.io-client";
-import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    Legend,
-    ResponsiveContainer,
-} from "recharts";
+// import {
+//     LineChart,
+//     Line,
+//     XAxis,
+//     YAxis,
+//     CartesianGrid,
+//     Tooltip,
+//     Legend,
+//     ResponsiveContainer,
+// } from "recharts";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import * as Tone from "tone"; // Import Tone.js
 import "../App.css";
+import { Gauge, gaugeClasses } from '@mui/x-charts/Gauge';
+import { TbCircleLetterGFilled } from "react-icons/tb";
 
 // Create a single WebSocket instance
 const socket = io(SOCKET, {
@@ -22,6 +24,22 @@ const socket = io(SOCKET, {
     reconnectionAttempts: 5, // Retry up to 5 times if disconnected
     reconnectionDelay: 2000, // Wait 2s before retrying
 });
+
+const GAUGE_COLORS: Record<keyof Omit<GraphData, 'name'>, string> = {
+    voltage: "#ff0000",    // Red
+    current: "#ffd700",    // Yellow
+    temperature: "#0000ff" // Blue
+} as const;
+
+type GaugeMaxValues = {
+    [K in keyof Omit<GraphData, 'name'>]: number;
+};
+
+const maxValues: GaugeMaxValues = {
+    voltage: 300,
+    current: 50,
+    temperature: 100
+};
 
 type GraphData = {
     name: string;
@@ -126,44 +144,65 @@ function MobileUI() {
         return <span className="text-green-600 font-bold text-lg">NORMAL</span>;
     };
 
-    const renderChart = (dataKey: keyof GraphData, label: string, color: string) => (
-        <div className="bg-white shadow-lg rounded-lg p-6">
-            <div className="flex flex-col space-y-2">
-                <h2 className="text-xl font-semibold text-gray-800">{label}</h2>
-                <div className="flex justify-between items-center">
-                    {dataKey === "voltage" && data.length > 0 && (
-                        <div className="flex items-center">
-                            Status: {getVoltageStatus(data[data.length - 1].voltage)}
-                        </div>
-                    )}
-                    {dataKey === "current" && data.length > 0 && (
-                        <div className="flex items-center">
-                            Status: {getCurrentStatus(data[data.length - 1].current)}
-                        </div>
-                    )}
-                    {dataKey === "temperature" && data.length > 0 && (
-                        <div className="flex items-center">
-                            Status: {getTemperatureStatus(data[data.length - 1].temperature)}
-                        </div>
-                    )}
+    const renderChart = (dataKey: keyof Omit<GraphData, 'name'>, label: string) => {
+        const rawValue = data.length > 0 ? Number(data[data.length - 1][dataKey]) : 0;
+        const value = Math.min(rawValue, maxValues[dataKey]); // Ensure value does not exceed max
+        const normalizedValue = (value / maxValues[dataKey]) * 100; // Normalize value to a percentage (0-100)
+    
+        return (
+            <div className="bg-white shadow-lg rounded-lg p-6">
+                
+                <div className="flex flex-col space-y-2">
+                    <h2 className="text-xl font-semibold text-gray-800 text-center">{label}</h2>
+                    <div className="flex justify-center items-center">
+                        {dataKey === "voltage" && getVoltageStatus(rawValue)}
+                        {dataKey === "current" && getCurrentStatus(rawValue)}
+                        {dataKey === "temperature" && getTemperatureStatus(rawValue)}
+                    </div>
+                    <div className="flex justify-center items-center h-[200px]">
+                        <Gauge
+                            value={normalizedValue} // Use normalized value (0-100)
+                            max={100} // Gauge max is always 100 (percentage)
+                            valueLabel={`${rawValue.toFixed(2)} ${label.split(" ")[1]}`}
+                            startAngle={-110}
+                            endAngle={110}
+                            sx={{
+                                width: '100%',
+                                height: '200px',
+                                [`& .${gaugeClasses.valueText}`]: {
+                                    fontSize: '1rem',
+                                    display: 'none',
+                                    fill: 'black',
+                                },
+                                [`& .${gaugeClasses.valueArc}`]: {
+                                    fill: GAUGE_COLORS[dataKey as keyof typeof GAUGE_COLORS],
+                                },
+                                [`& .${gaugeClasses.referenceArc}`]: {
+                                    fill: '#e0e0e0',
+                                },
+                            }}
+                        />
+                    </div>
+                    {/* Display the real data below the gauge */}
+                    <div className="text-center mt-2">
+                        <p className="text-lg font-bold text-gray-800">
+                            {rawValue.toFixed(2)} {label.split(" ")[1]}
+                        </p>
+                    </div>
                 </div>
-                <ResponsiveContainer width="100%" height={200}>
-                    <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                        <XAxis dataKey="name" stroke="#2c3e50" />
-                        <YAxis stroke="#2c3e50" />
-                        <Tooltip contentStyle={{ backgroundColor: "#fff", borderRadius: "4px" }} />
-                        <Legend />
-                        <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={3} dot={{ fill: color, strokeWidth: 2 }} />
-                    </LineChart>
-                </ResponsiveContainer>
             </div>
-        </div>
-    );
+        );
+    };
+
 
     return (
         <div className="min-h-screen bg-gray-100 p-6">
-            <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Real-Time Panel Board Monitor</h1>
+           <div className="w-full flex flex-row justify-center items-center gap-2 bg-sky-800 p-2 mb-4">
+               <TbCircleLetterGFilled className="text-3xl" />
+                 <h3 className="text-2xl font-bold text-center text-white">
+                      ELECTRICAL MONITORING SYSTEM
+                </h3>
+            </div>
 
             <div className="flex justify-center items-center mb-4">
                 <div className={`px-4 py-2 rounded-full ${
@@ -174,9 +213,9 @@ function MobileUI() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                {renderChart("voltage", "Voltage (V)", "#3498db")}
-                {renderChart("current", "Current (A)", "#e67e22")}
-                {renderChart("temperature", "Temperature (°C)", "#e74c3c")}
+                {renderChart("voltage", "Voltage (V)")}
+                {renderChart("current", "Current (A)")}
+                {renderChart("temperature", "Temperature (°C)")}
             </div>
 
             <div className="mt-6 p-4 bg-white shadow-md rounded-lg text-center">

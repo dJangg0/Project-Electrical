@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import Login from "./components/login";
 import Dashboard from "./components/dashboard"; // Admin UI
 import MobileUI from "./components/mobileUI"; // Mobile UI
+import "./App.css";
 
 const App = () => {
   const [userRole, setUserRole] = useState<"admin" | "user" | null>(

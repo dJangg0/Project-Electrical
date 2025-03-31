@@ -9,12 +9,12 @@ import {
     CartesianGrid,
     Tooltip,
     Legend,
-    ResponsiveContainer,
+    ResponsiveContainer
 } from "recharts";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import * as Tone from "tone"; // Import Tone.js
-
+import { TbCircleLetterGFilled } from "react-icons/tb";
 import "../App.css";
 
 // Create a single WebSocket instance
@@ -100,59 +100,146 @@ function Dashboard() {
             };
         }, []);
 
-    const renderChart = (dataKey: keyof GraphData, label: string, color: string) => (
-        <div className="bg-white shadow-lg rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800">{label}</h2>
+        const renderChart = (dataKey: keyof GraphData, label: string, color: string) => (
+            <div className="bg-white shadow-lg rounded-lg p-6">
+                <div className="flex justify-center items-center mb-4">
+                    <h2 className="text-xl font-semibold text-gray-800 text-center">{label}</h2>
+                </div>
+                <ResponsiveContainer width="130%" height={200}>
+                    <LineChart
+                        data={data}
+                        margin={{ top: 20, right: 40, left: -25, bottom: 20 }} // Adjusted left margin to -20
+                    >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                        <XAxis dataKey="name" stroke="#2c3e50" />
+                        <YAxis stroke="#2c3e50" />
+                        <Tooltip contentStyle={{ backgroundColor: "#fff", borderRadius: "4px" }} />
+                        <Legend />
+                        <Line
+                            type="monotone"
+                            dataKey={dataKey}
+                            stroke={color}
+                            strokeWidth={3}
+                            dot={{ r: 4 }}
+                            activeDot={{ r: 6 }}
+                        />
+                    </LineChart>
+                </ResponsiveContainer>
             </div>
-            <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-                    <XAxis dataKey="name" stroke="#2c3e50" />
-                    <YAxis stroke="#2c3e50" />
-                    <Tooltip contentStyle={{ backgroundColor: "#fff", borderRadius: "4px" }} />
-                    <Legend />
-                    <Line type="monotone" dataKey={dataKey} stroke={color} strokeWidth={3} dot={{ fill: color, strokeWidth: 2 }} />
-                </LineChart>
-            </ResponsiveContainer>
+        );
+
+        return (
+            <div className="min-h-1/2 bg-gray-100 p-6 flex">
+              {/* Panel Board */}
+<div className="w-1/4 bg-white shadow-lg rounded-lg p-4 min-h-screen flex flex-col">
+    <h3 className="text-lg font-bold text-center text-gray-800 mb-4 sticky">Panel Board</h3>
+    <div className="flex-1 grid grid-cols-2 gap-4">
+        <div
+            className={`rounded-lg flex items-center justify-center px-2 text-center text-sm ${
+                data.length > 0 && data[data.length - 1].voltage > 250
+                    ? "bg-red-500 animate-pulse text-white"
+                    : "bg-gray-200 text-gray-800"
+            }`}
+        >
+            Over Voltage
         </div>
-    );
-
-    return (
-        <div className="min-h-screen bg-gray-100 p-6">
-            <h1 className="text-4xl font-bold text-center text-gray-800 mb-6">Real-Time Panel Board Monitor</h1>
-
-            <div className="flex justify-center items-center mb-4">
-                <div className={`px-4 py-2 rounded-full ${
-                    isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
-                    {isConnected ? '🟢 Connected' : '🔴 Disconnected'}
+        <div
+            className={`rounded-lg flex items-center justify-center px-2 text-center text-sm ${
+                data.length > 0 && data[data.length - 1].voltage < 207
+                    ? "bg-yellow-500 animate-pulse text-white"
+                    : "bg-gray-200 text-gray-800"
+            }`}
+        >
+            Under Voltage
+        </div>
+        <div
+            className={`rounded-lg flex items-center justify-center px-2 text-center text-sm ${
+                data.length > 0 && data[data.length - 1].current > 20
+                    ? "bg-red-500 animate-pulse text-white"
+                    : "bg-gray-200 text-gray-800"
+            }`}
+        >
+            Over Current
+        </div>
+        <div
+            className={`rounded-lg flex items-center justify-center px-2 text-center text-sm ${
+                data.length > 0 && data[data.length - 1].current < 10
+                    ? "bg-yellow-500 animate-pulse text-white"
+                    : "bg-gray-200 text-gray-800"
+            }`}
+        >
+            Under Current
+        </div>
+        <div
+            className={`rounded-lg flex items-center justify-center px-2 text-center text-sm ${
+                data.length > 0 && data[data.length - 1].temperature > 35
+                    ? "bg-red-500 animate-pulse text-white"
+                    : "bg-gray-200 text-gray-800"
+            }`}
+        >
+            High Temperature
+        </div>
+        <div
+            className={`rounded-lg flex items-center justify-center px-2 text-center text-sm ${
+                data.length > 0 && data[data.length - 1].temperature < 20
+                    ? "bg-yellow-500 animate-pulse text-white"
+                    : "bg-gray-200 text-gray-800"
+            }`}
+        >
+            Low Temperature
+        </div>
+    </div>
+</div>
+        
+                {/* Main Content */}
+                <div className="w-3/4 pl-6">
+                    <div className="w-full flex flex-row justify-center items-center gap-2 bg-sky-800 p-2">
+                        <TbCircleLetterGFilled className="text-3xl" />
+                        <h3 className="text-2xl font-bold text-center text-white">
+                            ELECTRICAL MONITORING SYSTEM
+                        </h3>
+                    </div>
+        
+                    <div className="flex justify-center items-center mb-4 mt-4">
+                        <div
+                            className={`px-4 py-2 rounded-full ${
+                                isConnected
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                            }`}
+                        >
+                            {isConnected ? "🟢 Connected" : "🔴 Disconnected"}
+                        </div>
+                    </div>
+        
+                    <div className="grid grid-cols-3 gap-4 mt-6 w-full"> {/* Changed grid-cols-1 to grid-rows-3 */}
+                        {renderChart("voltage", "Voltage (V)", "#3498db")}
+                        {renderChart("current", "Current (A)", "#e67e22")}
+                        {renderChart("temperature", "Temp (°C)", "#e74c3c")}
+                    </div>
+        
+                    <div className="mt-6 p-4 bg-white shadow-md rounded-lg text-center">
+                        <p className="text-gray-600">Latest Values:</p>
+                        {data.length > 0 ? (
+                            <div>
+                                <p className="text-lg font-bold text-gray-800">
+                                    {data[data.length - 1].voltage.toFixed(2)} V,{" "}
+                                    {data[data.length - 1].current.toFixed(2)} A,{" "}
+                                    {data[data.length - 1].temperature.toFixed(2)}°C
+                                </p>
+                            </div>
+                        ) : (
+                            <p className="text-lg font-bold text-gray-800">
+                                No data available
+                            </p>
+                        )}
+                    </div>
+        
+                    {/* Toast Container */}
+                    <ToastContainer />
                 </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-                {renderChart("voltage", "Voltage (V)", "#3498db")}
-                {renderChart("current", "Current (A)", "#e67e22")}
-                {renderChart("temperature", "Temperature (°C)", "#e74c3c")}
-            </div>
-
-            <div className="mt-6 p-4 bg-white shadow-md rounded-lg text-center">
-                <p className="text-gray-600">Latest Values:</p>
-                {data.length > 0 ? (
-                    <div>
-                        <p className="text-lg font-bold text-gray-800">
-                            {data[data.length - 1].voltage.toFixed(2)} V, {data[data.length - 1].current.toFixed(2)} A, {data[data.length - 1].temperature.toFixed(2)}°C
-                        </p>
-                    </div>
-                ) : (
-                    <p className="text-lg font-bold text-gray-800">No data available</p>
-                )}
-            </div>
-
-            {/* Toast Container */}
-            <ToastContainer />
-        </div>
-    );
-}
+        );
+    }
 
 export default Dashboard;

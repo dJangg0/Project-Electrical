@@ -25,8 +25,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-gray-100">
-            <form onSubmit={handleSubmit} className="bg-white p-8 shadow-xl rounded-lg w-96 space-y-6">
+        <div className="min-h-screen flex items-center justify-cente rounded-2xl p-2">
+            <form onSubmit={handleSubmit} className="bg-white p-8 border-3 border-blue-400 rounded-lg w-96 space-y-6">
                 <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Welcome Back</h2>
 
                 <div className="space-y-2">
@@ -61,10 +61,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
                 <button 
                     type="submit" 
-                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 ease-in-out"
+                    className="w-1/2  text-white py-3 rounded-lg font-semibold focus:ring-4 focus:ring-blue-500 !important"
                 >
                     Sign In
                 </button>
+                
             </form>
         </div>
     );
