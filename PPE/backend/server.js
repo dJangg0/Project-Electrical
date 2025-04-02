@@ -43,7 +43,7 @@ let currentIndex = 0;
 // Load CSV data
 const loadCSVData = () => {
   csvData = [];
-  fs.createReadStream("faultdata.csv")
+  fs.createReadStream("normaldata.csv")
     .pipe(csv())
     .on("data", (row) => {
       csvData.push({
@@ -101,7 +101,7 @@ const startDataEmission = () => {
         console.log("✅ All data emitted. Restarting from the beginning.");
         currentIndex = 0; // Restart from the beginning
       }
-    }, 3000); // 5-second interval
+    }, 3000); // 3-second interval
   }
 };
 
