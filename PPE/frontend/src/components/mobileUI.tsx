@@ -11,6 +11,7 @@ import { io } from "socket.io-client";
 //     Legend,
 //     ResponsiveContainer,
 // } from "recharts";
+import { GiElectricalResistance } from "react-icons/gi";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import * as Tone from "tone"; // Import Tone.js
@@ -26,8 +27,8 @@ const socket = io(SOCKET, {
 });
 
 const GAUGE_COLORS: Record<keyof Omit<GraphData, 'name'>, string> = {
-    voltage: "#ff0000",    // Red
-    current: "#ffd700",    // Yellow
+    voltage: "#fb4141",    // Red
+    current: "#ffeb55",    // Yellow
     temperature: "#0000ff" // Blue
 } as const;
 

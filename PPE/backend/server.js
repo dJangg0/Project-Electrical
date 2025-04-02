@@ -43,7 +43,7 @@ let currentIndex = 0;
 // Load CSV data
 const loadCSVData = () => {
   csvData = [];
-  fs.createReadStream("data.csv")
+  fs.createReadStream("faultdata.csv")
     .pipe(csv())
     .on("data", (row) => {
       csvData.push({
